@@ -81,17 +81,16 @@ public class SMPushRegisterDevice implements CustomCodeMethod {
     TokenAndType token = new TokenAndType(deviceToken, TokenType.iOS); // token type can be iOS or GCM
     
     try {
-	  PushService service = serviceProvider.getPushService();
-	    
-	  try {
-	    service.registerTokenForUser(username, token);
-	    responseCode = HttpURLConnection.HTTP_OK;
-	    responseBody = "token saved";
-	  } catch (Exception e) {
-	    logger.error("error registering token " + e.toString());
-	    responseCode = HttpURLConnection.HTTP_BAD_REQUEST;
-	    responseBody = e.toString();
-	  }
+      PushService service = serviceProvider.getPushService();
+      try {
+        service.registerTokenForUser(username, token);
+        responseCode = HttpURLConnection.HTTP_OK;
+        responseBody = "token saved";
+      } catch (Exception e) {
+        logger.error("error registering token " + e.toString());
+        responseCode = HttpURLConnection.HTTP_BAD_REQUEST;
+        responseBody = e.toString();
+      }
     } catch (ServiceNotActivatedException e) {
       logger.error("error service not active" + e.toString());
       responseCode = HttpURLConnection.HTTP_BAD_REQUEST;

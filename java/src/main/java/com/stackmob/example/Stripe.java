@@ -46,7 +46,7 @@ public class Stripe implements CustomCodeMethod {
 
   //Create your Stripe Acct at stripe.com and enter 
   //Your secret api key below.
-  public static final String secretKey = "sk_test_zxxxxxxxxxxxxah";
+  public static final String secretKey = "YOUR_SECRET_KEY_FROM_STRIPE";
 
   @Override
   public String getMethodName() {
@@ -97,7 +97,6 @@ public class Stripe implements CustomCodeMethod {
     body.append("&description=");
     body.append(description);
 
-    //String body = "amount=" + amount + "&currency=" + currency + "&card=" + token + "&description=" + description;
     String url = "https://api.stripe.com/v1/charges";
     String pair = secretKey;
       

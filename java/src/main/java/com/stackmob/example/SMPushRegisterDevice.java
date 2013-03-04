@@ -57,18 +57,20 @@ public class SMPushRegisterDevice implements CustomCodeMethod {
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("device_token","username");
+    return Arrays.asList("device_token","username","token_type");
   }  
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
     int responseCode = 0;
     String responseBody = "";
-    
+    TokenType deviceTokenType;
+
     LoggerService logger = serviceProvider.getLoggerService(SMPushRegisterDevice.class);  //Log to the StackMob Custom code console
     logger.debug("Start register device token");
 
     String deviceToken = request.getParams().get("device_token");  // DEVICE TOKEN should be YOUR mobile device token
+    String tokenType = request.getParams().get("token_type");  // TOKEN TYPE should be YOUR device type (ios / gcm)
     
     if (deviceToken == null || deviceToken.isEmpty()) {
       HashMap<String, String> errParams = new HashMap<String, String>();
@@ -76,9 +78,27 @@ public class SMPushRegisterDevice implements CustomCodeMethod {
       return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
     }
 
+    if (tokenType == null || tokenType.isEmpty()) {
+      HashMap<String, String> errParams = new HashMap<String, String>();
+      errParams.put("error", "the token type passed was empty or null");
+      return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
+    } else {
+      if (tokenType.equals("ios")) {
+        deviceTokenType = TokenType.iOS;
+      } else if  (tokenType.equals("gcm")) {
+        deviceTokenType = TokenType.AndroidGCM;
+      } else if  (tokenType.equals("c2dm")) {
+        deviceTokenType = TokenType.Android;
+      } else {
+        HashMap<String, String> errParams = new HashMap<String, String>();
+        errParams.put("error", "the token type passed was not valid, must be ios or gcm");
+        return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
+      }
+    }
+
     String username = request.getParams().get("username"); // (OPTIONAL) USERNAME to register a token to a specific username
 
-    TokenAndType token = new TokenAndType(deviceToken, TokenType.iOS); // token type can be iOS or GCM
+    TokenAndType token = new TokenAndType(deviceToken, deviceTokenType); // token type can be iOS or GCM
     
     try {
       PushService service = serviceProvider.getPushService();

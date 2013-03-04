@@ -25,6 +25,8 @@ import com.stackmob.core.InvalidSchemaException;
 import com.stackmob.core.DatastoreException;
 import com.stackmob.sdkapi.LoggerService;
 
+import java.lang.Integer;
+import java.lang.String;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,14 +50,31 @@ public class Increment implements CustomCodeMethod {
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
     int responseCode = 0;
     String responseBody = "";
+    int intNumber = 0;
 
     LoggerService logger = serviceProvider.getLoggerService(Increment.class);  //Log to the StackMob Custom Code Console
+
+    String strNumber = request.getParams().get("number");
+
+    if (strNumber == null || strNumber.isEmpty() ){
+      HashMap<String, String> errParams = new HashMap<String, String>();
+      errParams.put("error", "the number passed was empty or null");
+      return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
+    } else {
+      try {
+        intNumber = Integer.parseInt(strNumber);
+      } catch (NumberFormatException e) {
+        HashMap<String, String> errParams = new HashMap<String, String>();
+        errParams.put("error", "number format exception");
+        return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
+      }
+    }
 
     DataService dataService = serviceProvider.getDataService();   // get the StackMob datastore service and assemble the query
 
     try {
       List<SMUpdate> update = new ArrayList<SMUpdate>();
-      update.add(new SMIncrement("num_likes", -2));
+      update.add(new SMIncrement("num_likes", intNumber));
       SMObject incrementResult = dataService.updateObject("todo", "todo1", update); // todo schema with todo_id = todo1
       responseBody = incrementResult.toString();
     } catch (InvalidSchemaException e) {

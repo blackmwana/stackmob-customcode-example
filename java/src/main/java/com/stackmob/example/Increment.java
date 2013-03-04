@@ -21,19 +21,8 @@ import com.stackmob.core.rest.ResponseToProcess;
 import com.stackmob.sdkapi.SDKServiceProvider;
 import com.stackmob.sdkapi.*;
 
-import com.stackmob.sdkapi.http.HttpService;
-import com.stackmob.sdkapi.http.request.HttpRequest;
-import com.stackmob.sdkapi.http.request.GetRequest;
-import com.stackmob.sdkapi.http.response.HttpResponse;
-import com.stackmob.core.ServiceNotActivatedException;
-import com.stackmob.sdkapi.http.exceptions.AccessDeniedException;
-import com.stackmob.sdkapi.http.exceptions.TimeoutException;
 import com.stackmob.core.InvalidSchemaException;
 import com.stackmob.core.DatastoreException;
-
-import java.net.MalformedURLException;
-import com.stackmob.sdkapi.http.request.PostRequest;
-import com.stackmob.sdkapi.http.Header;
 import com.stackmob.sdkapi.LoggerService;
 
 import java.net.HttpURLConnection;
@@ -41,8 +30,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.ArrayList;
 
 public class Increment implements CustomCodeMethod {
@@ -67,10 +54,10 @@ public class Increment implements CustomCodeMethod {
     DataService dataService = serviceProvider.getDataService();   // get the StackMob datastore service and assemble the query
 
     try {
-        List<SMUpdate> update = new ArrayList<SMUpdate>();
-        update.add(new SMIncrement("num_likes", -2));
-        SMObject incrementResult = dataService.updateObject("todo", "todo1", update); // todo schema with todo_id = todo1
-        responseBody = incrementResult.toString();
+      List<SMUpdate> update = new ArrayList<SMUpdate>();
+      update.add(new SMIncrement("num_likes", -2));
+      SMObject incrementResult = dataService.updateObject("todo", "todo1", update); // todo schema with todo_id = todo1
+      responseBody = incrementResult.toString();
     } catch (InvalidSchemaException e) {
       HashMap<String, String> errMap = new HashMap<String, String>();
       errMap.put("error", "invalid_schema");

@@ -91,7 +91,7 @@ public class SMPushRegisterDevice implements CustomCodeMethod {
         deviceTokenType = TokenType.Android;
       } else {
         HashMap<String, String> errParams = new HashMap<String, String>();
-        errParams.put("error", "the token type passed was not valid, must be ios or gcm");
+        errParams.put("error", "the token type passed was not valid, must be ios, c2dm or gcm");
         return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
       }
     }

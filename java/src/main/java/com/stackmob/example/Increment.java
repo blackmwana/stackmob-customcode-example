@@ -24,6 +24,7 @@ import com.stackmob.sdkapi.*;
 import com.stackmob.core.InvalidSchemaException;
 import com.stackmob.core.DatastoreException;
 import com.stackmob.sdkapi.LoggerService;
+import com.stackmob.example.Util;
 
 import java.lang.Integer;
 import java.lang.String;
@@ -55,19 +56,14 @@ public class Increment implements CustomCodeMethod {
     LoggerService logger = serviceProvider.getLoggerService(Increment.class);  //Log to the StackMob Custom Code Console
 
     String strNumber = request.getParams().get("number");
+    Util.strCheck(strNumber, "number");
 
-    if (strNumber == null || strNumber.isEmpty() ){
+    try {
+      intNumber = Integer.parseInt(strNumber);
+    } catch (NumberFormatException e) {
       HashMap<String, String> errParams = new HashMap<String, String>();
-      errParams.put("error", "the number passed was empty or null");
+      errParams.put("error", "number format exception");
       return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
-    } else {
-      try {
-        intNumber = Integer.parseInt(strNumber);
-      } catch (NumberFormatException e) {
-        HashMap<String, String> errParams = new HashMap<String, String>();
-        errParams.put("error", "number format exception");
-        return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
-      }
     }
 
     DataService dataService = serviceProvider.getDataService();   // get the StackMob datastore service and assemble the query

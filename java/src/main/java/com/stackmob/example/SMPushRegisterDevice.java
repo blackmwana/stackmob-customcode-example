@@ -71,29 +71,20 @@ public class SMPushRegisterDevice implements CustomCodeMethod {
 
     String deviceToken = request.getParams().get("device_token");  // DEVICE TOKEN should be YOUR mobile device token
     String tokenType = request.getParams().get("token_type");  // TOKEN TYPE should be YOUR device type (ios / gcm)
-    
-    if (deviceToken == null || deviceToken.isEmpty()) {
-      HashMap<String, String> errParams = new HashMap<String, String>();
-      errParams.put("error", "the device token passed was empty or null");
-      return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
-    }
 
-    if (tokenType == null || tokenType.isEmpty()) {
-      HashMap<String, String> errParams = new HashMap<String, String>();
-      errParams.put("error", "the token type passed was empty or null");
-      return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
+    Util.strCheck(deviceToken, "device token");
+    Util.strCheck(tokenType, "token type");
+
+    if (tokenType.equals("ios")) {
+      deviceTokenType = TokenType.iOS;
+    } else if  (tokenType.equals("gcm")) {
+      deviceTokenType = TokenType.AndroidGCM;
+    } else if  (tokenType.equals("c2dm")) {
+      deviceTokenType = TokenType.Android;
     } else {
-      if (tokenType.equals("ios")) {
-        deviceTokenType = TokenType.iOS;
-      } else if  (tokenType.equals("gcm")) {
-        deviceTokenType = TokenType.AndroidGCM;
-      } else if  (tokenType.equals("c2dm")) {
-        deviceTokenType = TokenType.Android;
-      } else {
-        HashMap<String, String> errParams = new HashMap<String, String>();
-        errParams.put("error", "the token type passed was not valid, must be ios, c2dm or gcm");
-        return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
-      }
+      HashMap<String, String> errParams = new HashMap<String, String>();
+      errParams.put("error", "the token type passed was not valid, must be ios, c2dm or gcm");
+      return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
     }
 
     String username = request.getParams().get("username"); // (OPTIONAL) USERNAME to register a token to a specific username
@@ -102,21 +93,19 @@ public class SMPushRegisterDevice implements CustomCodeMethod {
     
     try {
       PushService service = serviceProvider.getPushService();
-      try {
-        service.registerTokenForUser(username, token);
-        responseCode = HttpURLConnection.HTTP_OK;
-        responseBody = "token saved";
-      } catch (Exception e) {
-        logger.error("error registering token " + e.toString());
-        responseCode = HttpURLConnection.HTTP_BAD_REQUEST;
-        responseBody = e.toString();
-      }
+      service.registerTokenForUser(username, token);
+      responseCode = HttpURLConnection.HTTP_OK;
+      responseBody = "token saved";
     } catch (ServiceNotActivatedException e) {
       logger.error("error service not active" + e.toString());
-      responseCode = HttpURLConnection.HTTP_BAD_REQUEST;
+      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR; // error 500
+      responseBody = e.toString();
+    } catch (Exception e) {
+      logger.error("error registering token " + e.toString());
+      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;  // error 500
       responseBody = e.toString();
     }
-    
+
     logger.debug("End register device token code");
 
     Map<String, Object> map = new HashMap<String, Object>();

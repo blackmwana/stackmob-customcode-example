@@ -14,15 +14,13 @@ import com.stackmob.core.rest.ResponseToProcess;
 
 public class Util {
 
-  static public ResponseToProcess strCheck(String str, String msg) {
+  static public Boolean strCheck(String str) {
     boolean bool = true;
 
     if (str == null || str.isEmpty() ) {
       bool = false;
     }
 
-    HashMap<String, String> errParams = new HashMap<String, String>();
-    errParams.put("error", "the " +  msg + " passed was null or empty.");
-    return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
+   return bool;
   }
 }

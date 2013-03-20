@@ -56,7 +56,12 @@ public class Increment implements CustomCodeMethod {
     LoggerService logger = serviceProvider.getLoggerService(Increment.class);  //Log to the StackMob Custom Code Console
 
     String strNumber = request.getParams().get("number");
-    Util.strCheck(strNumber, "number");
+
+    if ( Util.strCheck(strNumber) ) {
+      HashMap<String, String> errParams = new HashMap<String, String>();
+      errParams.put("error", "the number passed was null or empty.");
+      return new ResponseToProcess(HttpURLConnection.HTTP_BAD_REQUEST, errParams); // http 400 - bad request
+    }
 
     try {
       intNumber = Integer.parseInt(strNumber);

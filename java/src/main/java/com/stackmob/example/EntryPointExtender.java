@@ -37,7 +37,7 @@ public class EntryPointExtender extends JarEntryObject {
     list.add(new CreateObject());
     list.add(new ReadObject());
     list.add(new UpdateObject());
-//    list.add(new DeleteObject());
+    list.add(new DeleteObject());
 //    list.add(new QueryObject());
     list.add(new ReadParams());
 //    list.add(new Logging());

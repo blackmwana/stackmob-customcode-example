@@ -30,57 +30,59 @@ import org.json.simple.parser.ParseException;
 import java.net.HttpURLConnection;
 import java.util.*;
 
+/**
+ * This example will show a user how to write a custom code method
+ * with two parameters that updates the specified object in their schema
+ * when given a unique ID and a `year` field on which to update.
+ */
+
 public class UpdateObject implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "update_object";
+    return "CRUD_Update";
   }
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("make","year");
+    return Arrays.asList("car_ID","year");
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    String make = "";
-    String year = "";
+    String carID = "";
+    String year  = "";
 
-    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
     //Log the JSON object passed to the StackMob Logs
+    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
     logger.debug(request.getBody());
 
     JSONParser parser = new JSONParser();
     try {
       Object obj = parser.parse(request.getBody());
       JSONObject jsonObject = (JSONObject) obj;
-      make = (String) jsonObject.get("make");
+      carID = (String) jsonObject.get("car_ID");
       year = (String) jsonObject.get("year");
     } catch (ParseException pe) {
       logger.error(pe.getMessage(), pe);
     }
 
-    DataService ds = serviceProvider.getDataService();
-    Map<String, SMValue> map = new HashMap<String, SMValue>();
-    map.put("updated year", new SMInt(Long.parseLong(year)));
+    Map<String, SMValue> feedback = new HashMap<String, SMValue>();
+    feedback.put("updated year", new SMInt(Long.parseLong(year)));
 
+    DataService ds = serviceProvider.getDataService();
     List<SMUpdate> update = new ArrayList<SMUpdate>();
-    List<SMCondition> query = new ArrayList<SMCondition>();
-    // Create the changes in the form of an Update that you'd like to apply to the object
+
+    /* Create the changes in the form of an Update that you'd like to apply to the object
+     * In this case I want to make changes to year by overriding existing values with user input
+     */
     update.add(new SMSet("year", new SMInt(Long.parseLong(year))));
-    // In this case I want to make changes to year by overriding existing values with user input
-    List<SMObject> results;
+
+    SMObject result;
     try {
-      // I want to make changes to any car that matches the make parameter
-      query.add(new SMEquals("make", new SMString(make)));
-      // Gather list of all cars matching the make parameter
-      results = ds.readObjects("car", query);
-      for( SMObject smo : results) { // For each car, fetch car_ ID
-        String car_id = (String) smo.getValue().get("car_id").getValue();
-        // Access each object by car_ID (primary key) and update object
-        ds.updateObject("car", new SMString(car_id), update);
-      }
+      // Remember that the primary key in this car schema is `car_id`
+      result = ds.updateObject("car", new SMString(carID), update);
+      feedback.put("updated object", result);
     } catch (InvalidSchemaException ise) {
       HashMap<String, String> errMap = new HashMap<String, String>();
       errMap.put("error", "invalid_schema");
@@ -94,7 +96,7 @@ public class UpdateObject implements CustomCodeMethod {
       return new ResponseToProcess(HttpURLConnection.HTTP_INTERNAL_ERROR, errMap); // http 500 - internal server error
     }
 
-    return new ResponseToProcess(HttpURLConnection.HTTP_OK, map);
+    return new ResponseToProcess(HttpURLConnection.HTTP_OK, feedback);
   }
 
 }

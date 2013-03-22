@@ -26,35 +26,40 @@ import com.stackmob.sdkapi.*;
 import java.net.HttpURLConnection;
 import java.util.*;
 
+/**
+ * This example will show a user how to write a custom code method
+ * with one parameter that deletes the specified object from their schema
+ * when given a unique ID.
+ */
+
 public class DeleteObject implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "delete_object";
+    return "CRUD_Delete";
   }
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("make");
+    return Arrays.asList("car_ID");
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
     LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
-
-    Map<String, SMObject> map = new HashMap<String, SMObject>();
+    Map<String, SMObject> feedback = new HashMap<String, SMObject>();
 
     DataService ds = serviceProvider.getDataService();
 
     try {
-      ds.deleteObject("car", new SMString(request.getParams().get("make")));
+      ds.deleteObject("car", new SMString(request.getParams().get("car_ID")));
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);
     } catch (DatastoreException dse) {
       logger.error(dse.getMessage(), dse);
     }
 
-    return new ResponseToProcess(HttpURLConnection.HTTP_OK, map);
+    return new ResponseToProcess(HttpURLConnection.HTTP_OK, feedback);
   }
 
 }

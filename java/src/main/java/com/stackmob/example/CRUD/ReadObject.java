@@ -26,41 +26,45 @@ import com.stackmob.sdkapi.*;
 import java.net.HttpURLConnection;
 import java.util.*;
 
+/**
+ * This example will show a user how to write a custom code method
+ * with one parameter that reads the specified object from their schema
+ * when given a unique ID.
+ */
+
 public class ReadObject implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "read_object";
+    return "CRUD_Read";
   }
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("searchTerm");
+    return Arrays.asList("car_ID");
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
     LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
 
-    Map<String, SMObject> map = new HashMap<String, SMObject>();
+    // I'll be using this map to print messages to console as feedback to the operation
+    Map<String, SMObject> feedback = new HashMap<String, SMObject>();
 
     DataService ds = serviceProvider.getDataService();
     List<SMCondition> query = new ArrayList<SMCondition>();
     List<SMObject> results;
 
     try {
-      // I want to find any car that matches the make parameter
-      query.add(new SMEquals("make", new SMString(request.getParams().get("searchTerm"))));
-      // Gather all objects in schema matching searchTerm parameter
-      results = ds.readObjects("car", query);
+      // Create a new condition to match results to, or in this case, matching IDs (primary key)
+      query.add(new SMEquals("car_id", new SMString(request.getParams().get("car_ID"))));
+      results = ds.readObjects("car", query);  // Read objects from the `car` schema
       if (results != null && results.size() > 0) {
-        for( SMObject smo : results) {
-          map.put("car", smo);
-        }
+        feedback.put("car found", results.get(0));
       } else {
         HashMap<String, String> errMap = new HashMap<String, String>();
         errMap.put("error", "no match found");
-        errMap.put("detail", "no matches for the search term passed");
+        errMap.put("detail", "no matches for that ID");
         return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
       }
     } catch (InvalidSchemaException ise) {
@@ -69,7 +73,7 @@ public class ReadObject implements CustomCodeMethod {
       logger.error(dse.getMessage(), dse);
     }
 
-    return new ResponseToProcess(HttpURLConnection.HTTP_OK, map);
+    return new ResponseToProcess(HttpURLConnection.HTTP_OK, feedback);
   }
 
 }

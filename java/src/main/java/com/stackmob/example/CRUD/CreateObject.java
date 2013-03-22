@@ -33,11 +33,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This example will show a user how to write a custom code method
+ * with three parameters that creates an object in their schema.
+ *
+ */
+
 public class CreateObject implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "create_object";
+    return "CRUD_Create";
   }
 
   @Override
@@ -60,6 +66,7 @@ public class CreateObject implements CustomCodeMethod {
       Object obj = parser.parse(request.getBody());
       JSONObject jsonObject = (JSONObject) obj;
 
+      // Fetch the values passed in by the user from the body of JSON
       model = (String) jsonObject.get("model");
       make = (String) jsonObject.get("make");
       year = (String) jsonObject.get("year");
@@ -67,15 +74,16 @@ public class CreateObject implements CustomCodeMethod {
       logger.error(pe.getMessage(), pe);
     }
 
-    Map<String, SMValue> map = new HashMap<String, SMValue>();
+    // I'll be using this map to print messages to console as feedback to the operation
+    Map<String, SMValue> feedback = new HashMap<String, SMValue>();
 
-    map.put("model", new SMString(model));
-    map.put("make", new SMString(make));
-    map.put("year", new SMInt(Long.parseLong(year)));
+    feedback.put("model", new SMString(model));
+    feedback.put("make", new SMString(make));
+    feedback.put("year", new SMInt(Long.parseLong(year)));
 
     DataService ds = serviceProvider.getDataService();
     try {
-      ds.createObject("car", new SMObject(map));
+      ds.createObject("car", new SMObject(feedback));
     } catch (InvalidSchemaException ise) {
       HashMap<String, String> errMap = new HashMap<String, String>();
       errMap.put("error", "invalid_schema");
@@ -89,7 +97,7 @@ public class CreateObject implements CustomCodeMethod {
       return new ResponseToProcess(HttpURLConnection.HTTP_INTERNAL_ERROR, errMap); // http 500 - internal server error
     }
 
-    return new ResponseToProcess(HttpURLConnection.HTTP_OK, map);
+    return new ResponseToProcess(HttpURLConnection.HTTP_OK, feedback);
   }
 
 }

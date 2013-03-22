@@ -35,7 +35,7 @@
     <dependency>
       <groupId>com.stackmob</groupId>
       <artifactId>customcode</artifactId>
-      <version>${customcode.version}</version>
+      <version>0.5.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

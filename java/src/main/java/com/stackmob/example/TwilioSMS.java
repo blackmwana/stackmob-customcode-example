@@ -126,19 +126,19 @@ public class TwilioSMS implements CustomCodeMethod {
       responseBody = resp.getBody();
     } catch(TimeoutException e) {
       logger.error(e.getMessage(), e);
-      responseCode = HttpURLConnection.HTTP_BAD_GATEWAY;;
+      responseCode = HttpURLConnection.HTTP_BAD_GATEWAY;
       responseBody = e.getMessage();
     } catch(AccessDeniedException e) {
       logger.error(e.getMessage(), e);
-      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;;
+      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;
       responseBody = e.getMessage();
     } catch(MalformedURLException e) {
       logger.error(e.getMessage(), e);
-      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;;
+      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;
       responseBody = e.getMessage();
     } catch(ServiceNotActivatedException e) {
       logger.error(e.getMessage(), e);
-      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;;
+      responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;
       responseBody = e.getMessage();
     }
       

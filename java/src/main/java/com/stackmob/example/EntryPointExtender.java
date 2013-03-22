@@ -16,6 +16,9 @@
 
 package com.stackmob.example;
 
+import com.stackmob.example.crud.*;
+import com.stackmob.example.util.*;
+
 import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.jar.JarEntryObject;
 
@@ -31,6 +34,13 @@ public class EntryPointExtender extends JarEntryObject {
     list.add(new TwilioSMS());
     list.add(new SendGrid());
     list.add(new Stripe());
+    list.add(new CreateObject());
+    list.add(new ReadObject());
+    list.add(new UpdateObject());
+//    list.add(new DeleteObject());
+//    list.add(new QueryObject());
+    list.add(new ReadParams());
+//    list.add(new Logging());
     return list;
   }
 

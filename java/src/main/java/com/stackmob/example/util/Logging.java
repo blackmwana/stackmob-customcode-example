@@ -19,13 +19,23 @@ package com.stackmob.example.util;
 import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
+import com.stackmob.sdkapi.LoggerService;
 import com.stackmob.sdkapi.SDKServiceProvider;
+import com.stackmob.sdkapi.SMInt;
+import com.stackmob.sdkapi.SMString;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+/**
+ * This example will show a user how to use the logger
+ */
 
 public class Logging implements CustomCodeMethod {
 
@@ -41,8 +51,34 @@ public class Logging implements CustomCodeMethod {
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
+    // Initialize logger to "Classnamehere.class" when calling serviceProvider.getLoggerService()
+    LoggerService logger = serviceProvider.getLoggerService(Logging.class);
+
+    String model = "";
+    String make = "";
+    String year = "";
+
+    JSONParser parser = new JSONParser();
+
+    try {
+      Object obj = parser.parse(request.getBody());
+      JSONObject jsonObject = (JSONObject) obj;
+      model = (String) jsonObject.get("model");
+      logger.debug("Model: " + model);
+      make = (String) jsonObject.get("make");
+      logger.debug("Make: " + make);
+      year = (String) jsonObject.get("year");
+      logger.debug("Year: " + year.toString());
+    } catch (ParseException pe) {
+      // error("Message", Throwable)
+      logger.error(pe.getMessage(), pe);
+    }
+
     Map<String, Object> map = new HashMap<String, Object>();
-    map.put("msg", "Hello, world!");
+    map.put("model", new SMString(model));
+    map.put("make", new SMString(make));
+    map.put("year", new SMInt(Long.parseLong(year)));
+
     return new ResponseToProcess(HttpURLConnection.HTTP_OK, map);
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.stackmob.example;
+package com.stackmob.example.util;
 
 import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
@@ -28,6 +28,10 @@ import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
 import java.util.*;
+
+/**
+ * This example will show a user how to read the parameters passed in from a JSON request body
+ */
 
 public class ReadParams implements CustomCodeMethod {
 

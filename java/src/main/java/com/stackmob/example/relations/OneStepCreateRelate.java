@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.stackmob.example.crud;
+package com.stackmob.example.relations;
 
 import com.stackmob.core.InvalidSchemaException;
 import com.stackmob.core.DatastoreException;
@@ -23,68 +23,62 @@ import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
 import com.stackmob.sdkapi.SDKServiceProvider;
 import com.stackmob.sdkapi.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with three parameters that creates an object in their schema.
- *
+ * with one parameter that creates an object in the car schema
+ * and relates it to a parent User object
  */
 
-public class CreateObject implements CustomCodeMethod {
+public class OneStepCreateRelate implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "CRUD_Create";
+    return "One_Step_Create_Relate";
   }
 
   @Override
   public List<String> getParams() {
-    // Please note that the strings `user` and `username` are unsuitable for parameter names
-    return Arrays.asList("model","make","year");
+    return Arrays.asList("name");
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    String model = "";
-    String make = "";
-    String year = "";
+    Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
+    LoggerService logger = serviceProvider.getLoggerService(OneStepCreateRelate.class);
 
-    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
-    //Log the JSON object passed to the StackMob Logs
-    logger.debug(request.getBody());
 
-    JSONParser parser = new JSONParser();
-    try {
-      Object obj = parser.parse(request.getBody());
-      JSONObject jsonObject = (JSONObject) obj;
+    // These are some example cars that will be created
+    Map<String, SMValue> carValues1 = new HashMap<String, SMValue>();
+    carValues1.put("make", new SMString("Audi"));
+    carValues1.put("model", new SMString("R8"));
+    carValues1.put("year", new SMInt(2005L));
+    Map<String, SMValue> carValues2 = new HashMap<String, SMValue>();
+    carValues2.put("make", new SMString("Audi"));
+    carValues2.put("model", new SMString("spyder"));
+    carValues2.put("year", new SMInt(2005L));
 
-      // Fetch the values passed in by the user from the body of JSON
-      model = (String) jsonObject.get("model");
-      make = (String) jsonObject.get("make");
-      year = (String) jsonObject.get("year");
-    } catch (ParseException pe) {
-      logger.error(pe.getMessage(), pe);
-    }
+    SMObject car1 = new SMObject(carValues1);
+    SMObject car2 = new SMObject(carValues2);
 
-    // I'll be using this map to print messages to console as feedback to the operation
-    Map<String, SMValue> feedback = new HashMap<String, SMValue>();
-
-    feedback.put("model", new SMString(model));
-    feedback.put("make", new SMString(make));
-    feedback.put("year", new SMInt(Long.parseLong(year)));
+    List<SMObject> cars = new ArrayList<SMObject>();
+    cars.add(car1);
+    cars.add(car2);
 
     DataService ds = serviceProvider.getDataService();
+
     try {
-      ds.createObject("car", new SMObject(feedback));
+      /**
+       * In the `user` schema we are going to add our list of `cars` to the `garage` (one-to-many) relation
+       * found in the `user` specified by the input
+       */
+
+      SMString owner = new SMString(request.getParams().get("name"));
+      BulkResult result = ds.createRelatedObjects("user", owner, "garage", cars);
+      feedback.put(owner.getValue() + " now owns", cars);
     } catch (InvalidSchemaException ise) {
       HashMap<String, String> errMap = new HashMap<String, String>();
       errMap.put("error", "invalid_schema");

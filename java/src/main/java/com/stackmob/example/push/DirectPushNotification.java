@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.stackmob.example.util;
+package com.stackmob.example.push;
 
 import com.stackmob.core.DatastoreException;
 import com.stackmob.core.InvalidSchemaException;
 import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
+import com.stackmob.example.push.BroadcastPushNotification;
 import com.stackmob.sdkapi.*;
 
 import java.net.HttpURLConnection;
@@ -28,61 +29,50 @@ import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * that will read all geopoint values from the `user` schema and return
- * any results that fall both within a "Near" radius and within
- * a square, 2D area defined by 'WithinBox'.
+ * with one parameter `schema_name` that will query the specified schema
+ * for all objects contained within it.
  */
 
-public class ReadGeo implements CustomCodeMethod {
+public class DirectPushNotification implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "Read_Geopoint";
+    return "Send_Direct_Push_Notification";
   }
 
   @Override
   public List<String> getParams() {
-    return new ArrayList<String>();
+    return Arrays.asList("schema_name");
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(ReadGeo.class);
+    LoggerService logger = serviceProvider.getLoggerService(BroadcastPushNotification.class);
+
+    // I'll be using this map to print messages to console as feedback to the operation
     Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
-
-    SMNear near = new SMNear(           // Near-condition results will always be sorted by distance
-            "position",                 // name of GeoField in schema
-            new SMDouble(37.77207),     // latitude
-            new SMDouble(-122.40621),   // longitude
-            new SMDouble(.0025));       // radius - (62.25 mi) can be null
-
-    SMWithinBox withinBox = new SMWithinBox(  // Whereas withinbox results can be sorted
-            "position",
-            new SMDouble(37.8),
-            new SMDouble(-122.47),      // Top Left coords
-            new SMDouble(37.7),
-            new SMDouble(-122.3));      // Bottom Right coords
 
     DataService ds = serviceProvider.getDataService();
     List<SMCondition> query = new ArrayList<SMCondition>();
-    query.add(near);
-    query.add(withinBox);
+    // We don't have to edit the query because we want to read ALL objects
     List<SMObject> results;
 
     try {
-      results = ds.readObjects("user", query);
+      String schema = request.getParams().get("schema_name");
+      // Read objects from the whichever schema was passed in
+      results = ds.readObjects(schema, query);
       if (results != null && results.size() > 0) {
-        feedback.put("Locations found", results);
+        feedback.put(schema, results);
       } else {
         HashMap<String, String> errMap = new HashMap<String, String>();
         errMap.put("error", "no match found");
-        errMap.put("detail", "no matches for conditions set");
+        errMap.put("detail", "no matches for that ID");
         return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
       }
-    } catch (DatastoreException dse) {
-      logger.error(dse.getMessage(), dse);
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);
+    } catch (DatastoreException dse) {
+      logger.error(dse.getMessage(), dse);
     }
 
     return new ResponseToProcess(HttpURLConnection.HTTP_OK, feedback);

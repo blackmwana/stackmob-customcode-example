@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.stackmob.example.util;
+package com.stackmob.example.geopoints;
 
 import com.stackmob.core.DatastoreException;
 import com.stackmob.core.InvalidSchemaException;
@@ -22,9 +22,6 @@ import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
 import com.stackmob.sdkapi.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
 import java.util.*;
@@ -36,54 +33,52 @@ import java.util.*;
  * a square, 2D area defined by 'WithinBox'.
  */
 
-public class WriteGeo implements CustomCodeMethod {
+public class ReadGeo implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "Write_Geopoint";
+    return "Read_Geopoint";
   }
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("user_name", "Latitude", "Longitude");
+    return new ArrayList<String>();
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(WriteGeo.class);
-    Map<String, SMObject> feedback = new HashMap<String, SMObject>();
+    LoggerService logger = serviceProvider.getLoggerService(ReadGeo.class);
+    Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
 
-    String user      = "";
-    String latitude  = "";
-    String longitude = "";
+    SMNear near = new SMNear(           // Near-condition results will always be sorted by distance
+            "position",                 // name of GeoField in schema
+            new SMDouble(37.77207),     // latitude
+            new SMDouble(-122.40621),   // longitude
+            new SMDouble(.0025));       // radius - (62.25 mi) can be null
 
-    JSONParser parser = new JSONParser();
-    try {
-      Object obj = parser.parse(request.getBody());
-      JSONObject jsonObject = (JSONObject) obj;
-      user      = (String) jsonObject.get("user_name");
-      latitude  = (String) jsonObject.get("Latitude");
-      longitude = (String) jsonObject.get("Longitude");
-    } catch (ParseException pe) {
-      logger.error(pe.getMessage(), pe);
-    }
+    SMWithinBox withinBox = new SMWithinBox(  // Whereas withinbox results can be sorted
+            "position",
+            new SMDouble(37.8),
+            new SMDouble(-122.47),      // Top Left coords
+            new SMDouble(37.7),
+            new SMDouble(-122.3));      // Bottom Right coords
 
     DataService ds = serviceProvider.getDataService();
-    List<SMUpdate> update = new ArrayList<SMUpdate>();
-    Map<String, SMValue> geoPoint = new HashMap<String, SMValue>();
-    SMObject result;
+    List<SMCondition> query = new ArrayList<SMCondition>();
+    query.add(near);
+    query.add(withinBox);
+    List<SMObject> results;
 
     try {
-      geoPoint.put("lat", new SMDouble(Double.parseDouble(latitude)));
-      geoPoint.put("lon", new SMDouble(Double.parseDouble(longitude)));
-      update.add(new SMSet("position", new SMObject(geoPoint)));
-    } catch (NumberFormatException nfe) {
-      logger.error(nfe.getMessage(), nfe);
-    }
-
-    try {
-      result = ds.updateObject("user", new SMString(user), update);
-      feedback.put("Updated object", result);
+      results = ds.readObjects("user", query);
+      if (results != null && results.size() > 0) {
+        feedback.put("Locations found", results);
+      } else {
+        HashMap<String, String> errMap = new HashMap<String, String>();
+        errMap.put("error", "no match found");
+        errMap.put("detail", "no matches for conditions set");
+        return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
+      }
     } catch (DatastoreException dse) {
       logger.error(dse.getMessage(), dse);
     } catch (InvalidSchemaException ise) {

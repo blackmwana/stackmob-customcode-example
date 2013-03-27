@@ -18,10 +18,10 @@ package com.stackmob.example;
 
 import com.stackmob.example.crud.*;
 import com.stackmob.example.relations.*;
+import com.stackmob.example.util.*;
 
 import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.jar.JarEntryObject;
-import com.stackmob.example.util.ReadParams;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,14 @@ public class EntryPointExtender extends JarEntryObject {
     list.add(new RelateToParent());
     list.add(new DeleteRelation());
     list.add(new ReadParams());
-//    list.add(new Logging());
+    list.add(new Logging());
+    list.add(new HttpRequest());
+    list.add(new ReadGeo());
+    list.add(new WriteGeo());
+//    list.add(new BroadcastPushNotification());
+//    list.add(new DirectPushNotification());
+//    list.add(new RegisterPushToken());
+
     return list;
   }
 

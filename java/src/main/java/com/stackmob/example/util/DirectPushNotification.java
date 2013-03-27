@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.stackmob.example.crud;
+package com.stackmob.example.util;
 
 import com.stackmob.core.DatastoreException;
 import com.stackmob.core.InvalidSchemaException;
@@ -22,37 +22,55 @@ import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
 import com.stackmob.sdkapi.*;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
 import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with one parameter that deletes the specified object from their schema
- * when given a unique ID.
+ * with one parameter `schema_name` that will query the specified schema
+ * for all objects contained within it.
  */
 
-public class DeleteObject implements CustomCodeMethod {
+public class DirectPushNotification implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "CRUD_Delete";
+    return "Send_Direct_Push_Notification";
   }
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("car_ID");
+    return Arrays.asList("schema_name");
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(DeleteObject.class);
-    Map<String, SMObject> feedback = new HashMap<String, SMObject>();
+    LoggerService logger = serviceProvider.getLoggerService(BroadcastPushNotification.class);
+
+    // I'll be using this map to print messages to console as feedback to the operation
+    Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
 
     DataService ds = serviceProvider.getDataService();
+    List<SMCondition> query = new ArrayList<SMCondition>();
+    // We don't have to edit the query because we want to read ALL objects
+    List<SMObject> results;
 
     try {
-      ds.deleteObject("car", new SMString(request.getParams().get("car_ID")));
+      String schema = request.getParams().get("schema_name");
+      // Read objects from the whichever schema was passed in
+      results = ds.readObjects(schema, query);
+      if (results != null && results.size() > 0) {
+        feedback.put(schema, results);
+      } else {
+        HashMap<String, String> errMap = new HashMap<String, String>();
+        errMap.put("error", "no match found");
+        errMap.put("detail", "no matches for that ID");
+        return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
+      }
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);
     } catch (DatastoreException dse) {

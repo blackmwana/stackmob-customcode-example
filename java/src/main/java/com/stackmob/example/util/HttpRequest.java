@@ -16,22 +16,25 @@
 
 package com.stackmob.example.util;
 
-import com.stackmob.core.InvalidSchemaException;
-import com.stackmob.core.DatastoreException;
+import com.stackmob.core.ServiceNotActivatedException;
 import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
 import com.stackmob.sdkapi.SDKServiceProvider;
 import com.stackmob.sdkapi.*;
+import com.stackmob.sdkapi.http.Header;
+import com.stackmob.sdkapi.http.HttpService;
+import com.stackmob.sdkapi.http.exceptions.AccessDeniedException;
+import com.stackmob.sdkapi.http.exceptions.TimeoutException;
+import com.stackmob.sdkapi.http.request.GetRequest;
+import com.stackmob.sdkapi.http.response.HttpResponse;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.MalformedURLException;
+import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
@@ -48,52 +51,61 @@ public class HttpRequest implements CustomCodeMethod {
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("model","make","year");
+    return new ArrayList<String>();
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
     LoggerService logger = serviceProvider.getLoggerService(HttpRequest.class);
-    //Log the JSON object passed to the StackMob Logs
-    logger.debug(request.getBody());
-
-    JSONParser parser = new JSONParser();
-    try {
-      Object obj = parser.parse(request.getBody());
-      JSONObject jsonObject = (JSONObject) obj;
-
-      // Fetch the values passed in by the user from the body of JSON
-//      model = (String) jsonObject.get("model");
-//      make = (String) jsonObject.get("make");
-//      year = (String) jsonObject.get("year");
-    } catch (ParseException pe) {
-      logger.error(pe.getMessage(), pe);
-    }
-
-    // I'll be using this map to print messages to console as feedback to the operation
-    Map<String, SMValue> feedback = new HashMap<String, SMValue>();
-
-//    feedback.put("model", new SMString(model));
-//    feedback.put("make", new SMString(make));
-//    feedback.put("year", new SMInt(Long.parseLong(year)));
+    int responseCode = 0;
+    String responseBody = "";
 
     DataService ds = serviceProvider.getDataService();
-    try {
-      ds.createObject("car", new SMObject(feedback));
-    } catch (InvalidSchemaException ise) {
-      HashMap<String, String> errMap = new HashMap<String, String>();
-      errMap.put("error", "invalid_schema");
-      errMap.put("detail", ise.toString());
-      return new ResponseToProcess(HttpURLConnection.HTTP_INTERNAL_ERROR, errMap); // http 500 - internal server error
 
-    } catch (DatastoreException dse) {
-      HashMap<String, String> errMap = new HashMap<String, String>();
-      errMap.put("error", "datastore_exception");
-      errMap.put("detail", dse.toString());
-      return new ResponseToProcess(HttpURLConnection.HTTP_INTERNAL_ERROR, errMap); // http 500 - internal server error
+    // The service you're going to be using
+    String url = "http://www.httpbin.org/get";
+    // Formulate request headers
+    Header accept = new Header("Accept-Charset", "utf-8");
+    Header content = new Header("Content-Type", "application/x-www-form-urlencoded");
+
+    Set<Header> set = new HashSet();
+    set.add(accept);
+    set.add(content);
+
+    try {
+      HttpService http = serviceProvider.getHttpService();
+      /**
+       * In this Example we are going to be making a get request
+       * but put/post/delete requests are also possible.
+       */
+      GetRequest req = new GetRequest(url,set);
+      HttpResponse resp = http.get(req);
+
+      responseCode = resp.getCode();
+      responseBody = resp.getBody();
+
+    } catch (ServiceNotActivatedException e) {
+      logger.error(e.getMessage(), e);
+      responseCode = HttpURLConnection.HTTP_UNAVAILABLE;
+      responseBody = e.getMessage();
+    } catch (MalformedURLException e) {
+      logger.error(e.getMessage(), e);
+      responseCode = HttpURLConnection.HTTP_NOT_FOUND;
+      responseBody = e.getMessage();
+    } catch (AccessDeniedException e) {
+      logger.error(e.getMessage(), e);
+      responseCode = HttpURLConnection.HTTP_UNAUTHORIZED;
+      responseBody = e.getMessage();
+    } catch (TimeoutException e) {
+      logger.error(e.getMessage(), e);
+      responseCode = HttpURLConnection.HTTP_GATEWAY_TIMEOUT;
+      responseBody = e.getMessage();
     }
 
-    return new ResponseToProcess(HttpURLConnection.HTTP_OK, feedback);
+    Map<String, String> feedback = new HashMap<String, String>();
+    feedback.put("response_body", responseBody);
+
+    return new ResponseToProcess(responseCode, feedback);
   }
 
 }

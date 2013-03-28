@@ -16,12 +16,13 @@
 
 package com.stackmob.example.push;
 
-import com.stackmob.core.DatastoreException;
-import com.stackmob.core.InvalidSchemaException;
+import com.stackmob.core.PushServiceException;
+import com.stackmob.core.ServiceNotActivatedException;
 import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
 import com.stackmob.sdkapi.*;
+import com.stackmob.sdkapi.PushService.*;
 
 import java.net.HttpURLConnection;
 import java.util.*;
@@ -36,45 +37,36 @@ public class BroadcastPushNotification implements CustomCodeMethod {
 
   @Override
   public String getMethodName() {
-    return "Broadcast_Push_Notification";
+    return "PUSH_Broadcast_Notification";
   }
 
   @Override
   public List<String> getParams() {
-    return Arrays.asList("schema_name");
+    return new ArrayList<String>();
   }
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(BroadcastPushNotification.class);
+    LoggerService logger = serviceProvider.getLoggerService(DirectPushNotification.class);
 
-    // I'll be using this map to print messages to console as feedback to the operation
-    Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
-
-    DataService ds = serviceProvider.getDataService();
-    List<SMCondition> query = new ArrayList<SMCondition>();
-    // We don't have to edit the query because we want to read ALL objects
-    List<SMObject> results;
+    Map<String, String> payload = new HashMap<String, String>();
 
     try {
-      String schema = request.getParams().get("schema_name");
-      // Read objects from the whichever schema was passed in
-      results = ds.readObjects(schema, query);
-      if (results != null && results.size() > 0) {
-        feedback.put(schema, results);
-      } else {
-        HashMap<String, String> errMap = new HashMap<String, String>();
-        errMap.put("error", "no match found");
-        errMap.put("detail", "no matches for that ID");
-        return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
-      }
-    } catch (InvalidSchemaException ise) {
-      logger.error(ise.getMessage(), ise);
-    } catch (DatastoreException dse) {
-      logger.error(dse.getMessage(), dse);
+      PushService ps = serviceProvider.getPushService();
+      payload.put("key1", "value1");
+      payload.put("sound", "someSound.mp3");
+      payload.put("alert", "Push Alert!");
+
+      ps.broadcastPush(payload);
+      logger.debug("Broadcasted Push notification");
+
+    } catch (ServiceNotActivatedException e){
+      logger.error(e.getMessage(), e);
+    } catch (PushServiceException e){
+      logger.error(e.getMessage(), e);
     }
 
-    return new ResponseToProcess(HttpURLConnection.HTTP_OK, feedback);
+    return new ResponseToProcess(HttpURLConnection.HTTP_OK, payload);
   }
 
 }

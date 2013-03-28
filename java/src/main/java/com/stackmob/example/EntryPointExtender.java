@@ -34,30 +34,35 @@ public class EntryPointExtender extends JarEntryObject {
   public List<CustomCodeMethod> methods() {
     List<CustomCodeMethod> list = new ArrayList<CustomCodeMethod>();
     list.add(new HelloWorld());
+    list.add(new ReadParams());
+    list.add(new Logging());
+    list.add(new HttpRequest());
     list.add(new TwilioSMS());
     list.add(new SendGrid());
     list.add(new Stripe());
+    /* Basic CRUD operations on schemas */
     list.add(new CreateObject());
     list.add(new ReadObject());
     list.add(new UpdateObject());
     list.add(new DeleteObject());
     list.add(new ReadAllObjects());
+    /* Equality Queries */
     list.add(new QueryByField());
     list.add(new QueryByEquality());
     list.add(new PaginateResults());
     list.add(new DeleteMultiple());
+    /* Manipulating Relations and Arrays */
     list.add(new OneStepCreateRelate());
     list.add(new FetchExpand());
     list.add(new RelateToParent());
     list.add(new DeleteRelation());
-    list.add(new ReadParams());
-    list.add(new Logging());
-    list.add(new HttpRequest());
+    /* Geopoint examples */
     list.add(new ReadGeo());
     list.add(new WriteGeo());
-//    list.add(new BroadcastPushNotification());
-//    list.add(new DirectPushNotification());
-//    list.add(new RegisterPushToken());
+    /* Push Notifications */
+    list.add(new SMPushRegisterDevice());
+    list.add(new BroadcastPushNotification());
+    list.add(new DirectPushNotification());
 
     return list;
   }

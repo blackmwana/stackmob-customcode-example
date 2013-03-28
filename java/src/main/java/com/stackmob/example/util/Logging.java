@@ -28,10 +28,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This example will show a user how to use the logger
@@ -46,7 +43,7 @@ public class Logging implements CustomCodeMethod {
 
   @Override
   public List<String> getParams() {
-    return new ArrayList<String>();
+    return Arrays.asList("model", "make", "year");
   }
 
   @Override

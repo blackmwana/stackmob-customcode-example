@@ -2,10 +2,14 @@ package com.stackmob.example;
 
 /**
  * Created with IntelliJ IDEA.
- * User: stackmob
- * Date: 3/28/13
- * Time: 1:18 PM
- * To change this template use File | Settings | File Templates.
+ * User: sid
+ * Date: 3/12/13
+ * Time: 12:09 PM
  */
+
 public class Util {
+
+  static public Boolean strNullCheck(String str) {
+    return (str == null || str.isEmpty());
+  }
 }

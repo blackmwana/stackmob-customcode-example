@@ -47,10 +47,6 @@ public class QueryByField implements CustomCodeMethod {
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-
-    //Log the JSON object passed to the StackMob Logs
-    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
-
     Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
     List<SMCondition> query = new ArrayList<SMCondition>();
 
@@ -59,9 +55,11 @@ public class QueryByField implements CustomCodeMethod {
 
     try {
       SMString make = new SMString(request.getParams().get("make"));
+
       // Create a query condition to match all car objects to the `make` that was passed in
       query.add(new SMEquals("make", make));
       results = ds.readObjects("car", query);
+
       if (results != null && results.size() > 0) {
         feedback.put(make.getValue(), results);
       }

@@ -31,7 +31,8 @@ import java.net.HttpURLConnection;
 import java.util.*;
 
 /**
- * This example will show a user how to use the logger
+ * This example will show a user how to use the logger to print the values
+ * of the parameters passed in by the PUT/POST operation.
  */
 
 public class Logging implements CustomCodeMethod {
@@ -57,14 +58,19 @@ public class Logging implements CustomCodeMethod {
 
     JSONParser parser = new JSONParser();
 
+    /* The following try/catch block shows how to properly fetch parameters for PUT/POST operations
+     * from the JSON request body. In order to get parameters from GET/DELETE operations,
+     * you must use request.getParams() (see DeleteObject.java)
+     */
     try {
       Object obj = parser.parse(request.getBody());
       JSONObject jsonObject = (JSONObject) obj;
       model = (String) jsonObject.get("model");
-      logger.debug("Model: " + model);
       make = (String) jsonObject.get("make");
-      logger.debug("Make: " + make);
       year = (String) jsonObject.get("year");
+
+      logger.debug("Model: " + model);
+      logger.debug("Make: " + make);
       logger.debug("Year: " + year.toString());
     } catch (ParseException pe) {
       // error("Message", Throwable)

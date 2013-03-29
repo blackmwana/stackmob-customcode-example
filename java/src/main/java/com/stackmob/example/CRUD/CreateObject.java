@@ -35,8 +35,8 @@ import java.util.Map;
 
 /**
  * This example will show a user how to write a custom code method
- * with three parameters that creates an object in their schema.
- *
+ * with three parameters `model`, `make`, and `year`
+ * which creates an object in the car schema.
  */
 
 public class CreateObject implements CustomCodeMethod {
@@ -59,9 +59,12 @@ public class CreateObject implements CustomCodeMethod {
     String year = "";
 
     LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
-    //Log the JSON object passed to the StackMob Logs
+    // JSON object gets passed into the StackMob Logs
     logger.debug(request.getBody());
 
+    /* The following try/catch block shows how to properly fetch parameters for PUT/POST operations
+     * from the JSON request body
+     */
     JSONParser parser = new JSONParser();
     try {
       Object obj = parser.parse(request.getBody());
@@ -84,6 +87,7 @@ public class CreateObject implements CustomCodeMethod {
 
     DataService ds = serviceProvider.getDataService();
     try {
+      // This is how you create an object in the `car` schema
       ds.createObject("car", new SMObject(feedback));
     } catch (InvalidSchemaException ise) {
       HashMap<String, String> errMap = new HashMap<String, String>();

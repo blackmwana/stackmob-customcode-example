@@ -22,15 +22,15 @@ import com.stackmob.core.customcode.CustomCodeMethod;
 import com.stackmob.core.rest.ProcessedAPIRequest;
 import com.stackmob.core.rest.ResponseToProcess;
 import com.stackmob.sdkapi.*;
-import com.stackmob.sdkapi.PushService.*;
+import com.stackmob.sdkapi.PushService;
 
 import java.net.HttpURLConnection;
 import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with one parameter `schema_name` that will query the specified schema
- * for all objects contained within it.
+ * that will broadcast a push notification to all devices registered
+ * to receive push notifications.
  */
 
 public class BroadcastPushNotification implements CustomCodeMethod {
@@ -47,12 +47,13 @@ public class BroadcastPushNotification implements CustomCodeMethod {
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(DirectPushNotification.class);
+    LoggerService logger = serviceProvider.getLoggerService(BroadcastPushNotification.class);
 
     Map<String, String> payload = new HashMap<String, String>();
 
     try {
       PushService ps = serviceProvider.getPushService();
+      // Add data to your push payload
       payload.put("key1", "value1");
       payload.put("sound", "someSound.mp3");
       payload.put("alert", "Push Alert!");

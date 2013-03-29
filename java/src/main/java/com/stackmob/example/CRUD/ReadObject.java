@@ -46,7 +46,7 @@ public class ReadObject implements CustomCodeMethod {
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
+    LoggerService logger = serviceProvider.getLoggerService(ReadObject.class);
 
     // I'll be using this map to print messages to console as feedback to the operation
     Map<String, SMObject> feedback = new HashMap<String, SMObject>();
@@ -56,17 +56,14 @@ public class ReadObject implements CustomCodeMethod {
     List<SMObject> results;
 
     try {
-      // Create a new condition to match results to, or in this case, matching IDs (primary key)
+      // Create a new condition to match results to, in this case, matching IDs (primary key)
       query.add(new SMEquals("car_id", new SMString(request.getParams().get("car_ID"))));
       results = ds.readObjects("car", query);  // Read objects from the `car` schema
+
       if (results != null && results.size() > 0) {
         feedback.put("car found", results.get(0));
-      } else {
-        HashMap<String, String> errMap = new HashMap<String, String>();
-        errMap.put("error", "no match found");
-        errMap.put("detail", "no matches for that ID");
-        return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
       }
+
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);
     } catch (DatastoreException dse) {

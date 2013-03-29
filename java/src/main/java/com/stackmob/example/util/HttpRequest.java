@@ -28,9 +28,6 @@ import com.stackmob.sdkapi.http.exceptions.AccessDeniedException;
 import com.stackmob.sdkapi.http.exceptions.TimeoutException;
 import com.stackmob.sdkapi.http.request.GetRequest;
 import com.stackmob.sdkapi.http.response.HttpResponse;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -38,8 +35,8 @@ import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with three parameters that creates an object in their schema.
- *
+ * that will perform an external http request to the httpbin.org
+ * website.
  */
 
 public class HttpRequest implements CustomCodeMethod {
@@ -60,8 +57,6 @@ public class HttpRequest implements CustomCodeMethod {
     int responseCode = 0;
     String responseBody = "";
 
-    DataService ds = serviceProvider.getDataService();
-
     // The service you're going to be using
     String url = "http://www.httpbin.org/get";
     // Formulate request headers
@@ -74,9 +69,9 @@ public class HttpRequest implements CustomCodeMethod {
 
     try {
       HttpService http = serviceProvider.getHttpService();
-      /**
-       * In this Example we are going to be making a get request
-       * but put/post/delete requests are also possible.
+
+      /* In this Example we are going to be making a GET request
+       * but PUT/POST/DELETE requests are also possible.
        */
       GetRequest req = new GetRequest(url,set);
       HttpResponse resp = http.get(req);

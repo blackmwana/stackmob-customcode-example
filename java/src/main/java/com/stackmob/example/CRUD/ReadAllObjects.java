@@ -49,7 +49,7 @@ public class ReadAllObjects implements CustomCodeMethod {
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
+    LoggerService logger = serviceProvider.getLoggerService(ReadAllObjects.class);
 
     // I'll be using this map to print messages to console as feedback to the operation
     Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
@@ -61,16 +61,13 @@ public class ReadAllObjects implements CustomCodeMethod {
 
     try {
       String schema = request.getParams().get("schema_name");
-      // Read objects from the whichever schema was passed in
+      // Read objects from the schema that was passed in
       results = ds.readObjects(schema, query);
+
       if (results != null && results.size() > 0) {
         feedback.put(schema, results);
-      } else {
-        HashMap<String, String> errMap = new HashMap<String, String>();
-        errMap.put("error", "no match found");
-        errMap.put("detail", "no matches for that ID");
-        return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
       }
+
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);
     } catch (DatastoreException dse) {

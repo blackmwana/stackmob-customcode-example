@@ -29,8 +29,9 @@ import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with one parameter that creates an object in the car schema
- * and relates it to a parent User object
+ * with one parameter that creates an object in the `car` schema
+ * and relates it to a parent `User` object. This relation is
+ * a property of the `user` and it is called `garage` in this example.
  */
 
 public class DeleteRelation implements CustomCodeMethod {
@@ -48,7 +49,7 @@ public class DeleteRelation implements CustomCodeMethod {
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
     Map<String, SMObject> feedback = new HashMap<String, SMObject>();
-    LoggerService logger = serviceProvider.getLoggerService(RelateToParent.class);
+    LoggerService logger = serviceProvider.getLoggerService(DeleteRelation.class);
 
     DataService ds = serviceProvider.getDataService();
     List<SMValue> valuesToRemove = new ArrayList<SMValue>();

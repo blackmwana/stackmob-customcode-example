@@ -28,8 +28,9 @@ import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with one parameter that reads the specified object from their schema
- * when given a unique ID.
+ * that will do an expanded (deep) fetch of `user` objects. This
+ * expanded fetch will cause any relationship property found in `user` to return
+ * entire objects instead of just a list of strings.
  */
 
 public class FetchExpand implements CustomCodeMethod {
@@ -61,7 +62,7 @@ public class FetchExpand implements CustomCodeMethod {
        * children of the children of the initial object, that is, 2 levels deep. The maximum
        * value for expand depth is 3, which means the fetch will only be called up to 3 levels
        * recursively. Imagine 1, 2, 3 to mean children, grandchildren, and great-grandchildren
-       * of the initial object respectively.
+       * of the initial object, respectively.
        */
       results = ds.readObjects("user", new ArrayList<SMCondition>(), 1);
       feedback.put("results", results);

@@ -57,12 +57,13 @@ public class DeleteMultiple implements CustomCodeMethod {
       SMString make = new SMString(request.getParams().get("make"));
       // Create a query condition to match all car objects to the `make` that was passed in
       query.add(new SMEquals("make", make));
-      results = ds.readObjects("car", query);
+      results = ds.readObjects("car", query); // Read all objects in `car` schema that match the query
+
       if (results != null && results.size() > 0) {
-        feedback.put("Deleting", results);
+        feedback.put("Deleting", results); // To show what has been deleted
         for(SMObject smo : results) {
-          SMString carID = (SMString) smo.getValue().get("car_id");
-          ds.deleteObject("car", carID);
+          SMString carID = (SMString) smo.getValue().get("car_id"); // Get the ID of each car
+          ds.deleteObject("car", carID); // Finally the object gets deleted by ID.
         }
       }
 

@@ -30,7 +30,7 @@ import java.util.*;
 /**
  * This example will show a user how to write a custom code method
  * with one parameter that creates an object in the car schema
- * and relates it to a parent User object
+ * and relates it to a parent `User` object
  */
 
 public class OneStepCreateRelate implements CustomCodeMethod {
@@ -71,14 +71,16 @@ public class OneStepCreateRelate implements CustomCodeMethod {
     DataService ds = serviceProvider.getDataService();
 
     try {
+      SMString owner = new SMString(request.getParams().get("name"));
+
       /**
        * In the `user` schema we are going to add our list of `cars` to the `garage` (one-to-many) relation
-       * found in the `user` specified by the input
+       * found in the `owner` specified by the input
        */
-
-      SMString owner = new SMString(request.getParams().get("name"));
       BulkResult result = ds.createRelatedObjects("user", owner, "garage", cars);
+
       feedback.put(owner.getValue() + " now owns", cars);
+
     } catch (InvalidSchemaException ise) {
       HashMap<String, String> errMap = new HashMap<String, String>();
       errMap.put("error", "invalid_schema");

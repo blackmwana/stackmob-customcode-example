@@ -28,8 +28,7 @@ import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with one parameter `schema_name` that will query the specified schema
- * for all objects contained within it.
+ * that will send a push notification directly to a specified device.
  */
 
 public class DirectPushNotification implements CustomCodeMethod {
@@ -53,8 +52,10 @@ public class DirectPushNotification implements CustomCodeMethod {
 
     try {
       PushService ps = serviceProvider.getPushService();
+      // Add data to your payload
       payload.put("badge", "1");
       payload.put("key1", "some data");
+      // Send the payload to the specified user
       ps.sendPushToUsers(Arrays.asList(user),payload);
       logger.debug("Sent push to " + user);
 

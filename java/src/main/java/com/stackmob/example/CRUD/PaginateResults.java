@@ -29,9 +29,7 @@ import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with one parameter `year` that queries the `car` schema for all objects
- * that match the condition (ie greater than, less than, order by) when
- * applied to the given year field
+ * that paginates the results of a mass query on the `car` schema
  */
 
 public class PaginateResults implements CustomCodeMethod {
@@ -48,7 +46,7 @@ public class PaginateResults implements CustomCodeMethod {
 
   @Override
   public ResponseToProcess execute(ProcessedAPIRequest request, SDKServiceProvider serviceProvider) {
-    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
+    LoggerService logger = serviceProvider.getLoggerService(PaginateResults.class);
     Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
 
     // Make a new ResultFilter that starts at 0 and ends at 9 to paginate at every 10 results
@@ -57,14 +55,10 @@ public class PaginateResults implements CustomCodeMethod {
     List<SMObject> results;
 
     try {
+      // Query on the `car` schema with no conditions to get all objects, and apply `filters` to them
       results = ds.readObjects("car", new ArrayList<SMCondition>(), 0, filters);
       if (results != null && results.size() > 0) {
         feedback.put("results", results);
-      } else {
-        HashMap<String, String> errMap = new HashMap<String, String>();
-        errMap.put("error", "no match found");
-        errMap.put("detail", "no matches for that ID");
-        return new ResponseToProcess(HttpURLConnection.HTTP_NOT_FOUND, errMap); // http 500 - internal server error
       }
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);

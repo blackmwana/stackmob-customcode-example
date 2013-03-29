@@ -51,6 +51,7 @@ public class QueryByEquality implements CustomCodeMethod {
 
     Map<String, List<SMObject>> feedback = new HashMap<String, List<SMObject>>();
     List<SMCondition> query = new ArrayList<SMCondition>();
+
     // We are going to primarily sort by year (ascending) and then by createddate in reverse-chrono
     List<SMOrdering> orderings = Arrays.asList(
             new SMOrdering("year", OrderingDirection.ASCENDING),
@@ -62,9 +63,11 @@ public class QueryByEquality implements CustomCodeMethod {
 
     try {
       SMInt year = new SMInt(Long.parseLong(request.getParams().get("year")));
-      // We only want years greater than or equal the user input
+
+      // We only want years greater than or equal to the user input
       query.add(new SMGreaterOrEqual("year", year));
       results = ds.readObjects("car", query, 0, filters);
+
       if (results != null && results.size() > 0) {
         feedback.put("results", results);
       }

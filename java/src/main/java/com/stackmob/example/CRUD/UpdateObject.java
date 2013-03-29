@@ -53,16 +53,21 @@ public class UpdateObject implements CustomCodeMethod {
     String carID = "";
     String year  = "";
 
-    //Log the JSON object passed to the StackMob Logs
-    LoggerService logger = serviceProvider.getLoggerService(CreateObject.class);
+    LoggerService logger = serviceProvider.getLoggerService(UpdateObject.class);
     logger.debug(request.getBody());
 
+    /* The following try/catch block shows how to properly fetch parameters for PUT/POST operations
+     * from the JSON request body
+     */
     JSONParser parser = new JSONParser();
     try {
       Object obj = parser.parse(request.getBody());
       JSONObject jsonObject = (JSONObject) obj;
+
+      // Fetch the values passed in by the user from the body of JSON
       carID = (String) jsonObject.get("car_ID");
       year = (String) jsonObject.get("year");
+
     } catch (ParseException pe) {
       logger.error(pe.getMessage(), pe);
     }
@@ -83,6 +88,7 @@ public class UpdateObject implements CustomCodeMethod {
       // Remember that the primary key in this car schema is `car_id`
       result = ds.updateObject("car", new SMString(carID), update);
       feedback.put("updated object", result);
+
     } catch (InvalidSchemaException ise) {
       HashMap<String, String> errMap = new HashMap<String, String>();
       errMap.put("error", "invalid_schema");

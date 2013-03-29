@@ -52,6 +52,9 @@ public class DeleteObject implements CustomCodeMethod {
     DataService ds = serviceProvider.getDataService();
 
     try {
+      /* In order to get the parameters (in this case car_ID)
+       * from a DELETE operation, you must use request.getParams
+       */
       ds.deleteObject("car", new SMString(request.getParams().get("car_ID")));
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);

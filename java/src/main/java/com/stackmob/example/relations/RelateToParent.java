@@ -29,8 +29,8 @@ import java.util.*;
 
 /**
  * This example will show a user how to write a custom code method
- * with one parameter that creates an object in the car schema
- * and relates it to a parent User object
+ * with two parameters that takes a unique car ID and then relates
+ * that already-existing car to a parent `user`
  */
 
 public class RelateToParent implements CustomCodeMethod {
@@ -55,16 +55,15 @@ public class RelateToParent implements CustomCodeMethod {
     SMObject result;
 
     try {
-      /**
-       * In the `user` schema we are going to add the car specified by ID to the `garage` (one-to-many) relation
-       * specified by the input `user_name`
-       */
       SMString owner = new SMString(request.getParams().get("user_name"));
       SMString carID = new SMString(request.getParams().get("car_ID"));
 
+      /* In the `user` schema we are going to add the car specified by ID to the `garage` (one-to-many) relation
+       * specified by the input `user_name`
+       */
       valuesToAppend.add(carID);
-
       result = ds.addRelatedObjects("user", owner, "garage", valuesToAppend);
+
       feedback.put("added " + carID.getValue() + "to", result);
     } catch (InvalidSchemaException ise) {
       logger.error(ise.getMessage(), ise);

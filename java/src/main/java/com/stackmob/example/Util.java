@@ -15,10 +15,10 @@ import com.stackmob.core.rest.ResponseToProcess;
 public class Util {
 
   static public Boolean strCheck(String str) {
-    boolean bool = true;
+    boolean bool = false;
 
     if (str == null || str.isEmpty() ) {
-      bool = false;
+      bool = true;
     }
 
    return bool;
